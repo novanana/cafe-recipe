@@ -25,7 +25,7 @@ export function useRecipes() {
   const [loading, setLoading] = useState(true)
 
   const fetchAll = useCallback(async () => {
-    const rows = await db.recipes.orderBy('createdAt').reverse().toArray()
+    const rows = await db.recipes.orderBy('id').toArray()
     setRecipes(rows)
     setLoading(false)
   }, [])
