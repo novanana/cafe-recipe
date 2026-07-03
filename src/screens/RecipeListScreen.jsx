@@ -9,10 +9,24 @@ const TEMP_ORDER = [
   { value: 'blended', label: '블렌디드' },
 ]
 
-export default function RecipeListScreen({ recipes, loading, toggleFavorite, bulkDelete, onNavigate }) {
-  const [query, setQuery]         = useState('')
-  const [activeTab, setTab]       = useState('all')
-  const [activeTemp, setTemp]     = useState('all')
+export default function RecipeListScreen({ recipes, loading, toggleFavorite, bulkDelete, onNavigate, initialFilter, onFilterChange }) {
+  const [filter, setFilter] = useState({
+    query:     initialFilter?.query     ?? '',
+    activeTab: initialFilter?.activeTab ?? 'all',
+    activeTemp:initialFilter?.activeTemp ?? 'all',
+  })
+  const { query, activeTab, activeTemp } = filter
+
+  const updateFilter = (patch) =>
+    setFilter((prev) => {
+      const next = { ...prev, ...patch }
+      onFilterChange?.(next)
+      return next
+    })
+
+  const setQuery = (v) => updateFilter({ query: v })
+  const setTab   = (v) => updateFilter({ activeTab: v, activeTemp: 'all' })
+  const setTemp  = (v) => updateFilter({ activeTemp: v })
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedIds, setSelectedIds]     = useState(new Set())
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -212,7 +226,7 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, bul
         ) : recipes.length === 0 ? (
           <EmptyAll />
         ) : filtered.length === 0 ? (
-          <EmptySearch query={query} tab={activeTab} onReset={() => { setQuery(''); setTab('all'); setTemp('all') }} />
+          <EmptySearch query={query} tab={activeTab} onReset={() => updateFilter({ query: '', activeTab: 'all', activeTemp: 'all' })} />
         ) : isFiltered ? (
           /* 검색/필터 결과 → 즐겨찾기 먼저, 단순 플랫 리스트 */
           <CardList

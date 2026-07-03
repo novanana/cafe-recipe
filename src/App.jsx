@@ -10,6 +10,7 @@ import UpdateBanner from './components/UpdateBanner'
 export default function App() {
   const recipesHook = useRecipes()
   const [nav, setNav] = useState({ screen: 'list', recipeId: null, copyFromId: null })
+  const [listFilter, setListFilter] = useState({ query: '', activeTab: 'all', activeTemp: 'all' })
 
   const navigate = (screen, recipeId = null, copyFromId = null) =>
     setNav({ screen, recipeId, copyFromId })
@@ -29,7 +30,14 @@ export default function App() {
   } else if (nav.screen === 'settings') {
     screen = <SettingsScreen {...recipesHook} onNavigate={navigate} />
   } else {
-    screen = <RecipeListScreen {...recipesHook} onNavigate={navigate} />
+    screen = (
+      <RecipeListScreen
+        {...recipesHook}
+        onNavigate={navigate}
+        initialFilter={listFilter}
+        onFilterChange={setListFilter}
+      />
+    )
   }
 
   return (
