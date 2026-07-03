@@ -7,19 +7,47 @@ const TEMP_CLASS = {
   blended: 'bg-emerald-100 text-emerald-600',
 }
 
-export default function RecipeCard({ recipe, onPress, onToggleFavorite }) {
+export default function RecipeCard({
+  recipe,
+  onPress,
+  onToggleFavorite,
+  selectionMode = false,
+  selected = false,
+}) {
   const { name, category, temperature, isFavorite, photos } = recipe
 
   return (
     <div
-      className="bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 flex active:scale-[0.98] transition-transform"
+      className={`bg-white rounded-2xl overflow-hidden shadow-sm border transition-all flex ${
+        selectionMode
+          ? selected
+            ? 'border-amber-400 shadow-amber-100'
+            : 'border-stone-100'
+          : 'border-stone-100 active:scale-[0.98]'
+      }`}
       onClick={onPress}
     >
-      <RecipePhoto
-        blob={photos?.[0]}
-        alt={name}
-        className="w-28 h-28 flex-shrink-0"
-      />
+      {/* 선택 모드 체크 오버레이 */}
+      <div className="relative flex-shrink-0">
+        <RecipePhoto blob={photos?.[0]} alt={name} className="w-28 h-28" />
+        {selectionMode && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+            <div
+              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                selected
+                  ? 'bg-amber-500 border-amber-500'
+                  : 'bg-white/80 border-white'
+              }`}
+            >
+              {selected && (
+                <svg viewBox="0 0 12 10" className="w-3 h-3 fill-white">
+                  <path d="M1 5l3 3 7-7" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="flex-1 px-4 py-3 flex flex-col justify-between min-w-0">
         <div>
@@ -33,16 +61,18 @@ export default function RecipeCard({ recipe, onPress, onToggleFavorite }) {
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <button
-            className={`text-xl leading-none transition-colors ${
-              isFavorite ? 'text-amber-400' : 'text-stone-200'
-            }`}
-            onClick={(e) => { e.stopPropagation(); onToggleFavorite() }}
-          >
-            ★
-          </button>
-        </div>
+        {!selectionMode && (
+          <div className="flex justify-end">
+            <button
+              className={`text-xl leading-none transition-colors ${
+                isFavorite ? 'text-amber-400' : 'text-stone-200'
+              }`}
+              onClick={(e) => { e.stopPropagation(); onToggleFavorite() }}
+            >
+              ★
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

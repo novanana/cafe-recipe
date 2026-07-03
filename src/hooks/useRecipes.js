@@ -75,6 +75,12 @@ export function useRecipes() {
     await fetchAll()
   }, [fetchAll])
 
+  /** 여러 레시피 한꺼번에 삭제 */
+  const bulkDelete = useCallback(async (ids) => {
+    await db.recipes.bulkDelete(ids)
+    await fetchAll()
+  }, [fetchAll])
+
   return {
     recipes,
     loading,
@@ -83,6 +89,7 @@ export function useRecipes() {
     updateRecipe,
     deleteRecipe,
     toggleFavorite,
+    bulkDelete,
     refetch: fetchAll,
   }
 }

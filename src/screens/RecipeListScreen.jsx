@@ -9,10 +9,33 @@ const TEMP_ORDER = [
   { value: 'blended', label: '블렌디드' },
 ]
 
-export default function RecipeListScreen({ recipes, loading, toggleFavorite, onNavigate }) {
-  const [query, setQuery]     = useState('')
-  const [activeTab, setTab]   = useState('all')
-  const [activeTemp, setTemp] = useState('all')
+export default function RecipeListScreen({ recipes, loading, toggleFavorite, bulkDelete, onNavigate }) {
+  const [query, setQuery]         = useState('')
+  const [activeTab, setTab]       = useState('all')
+  const [activeTemp, setTemp]     = useState('all')
+  const [selectionMode, setSelectionMode] = useState(false)
+  const [selectedIds, setSelectedIds]     = useState(new Set())
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting]   = useState(false)
+
+  const exitSelection = () => { setSelectionMode(false); setSelectedIds(new Set()) }
+
+  const toggleSelect = (id) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+
+  const selectAll = () => setSelectedIds(new Set(filtered.map((r) => r.id)))
+
+  const handleBulkDelete = async () => {
+    setDeleting(true)
+    await bulkDelete([...selectedIds])
+    setDeleting(false)
+    setShowDeleteConfirm(false)
+    exitSelection()
+  }
 
   /* ── 탭 목록 (실제 레시피에 있는 카테고리만 표시) ── */
   const tabs = useMemo(() => {
@@ -57,21 +80,51 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, onN
       {/* ── 헤더 (sticky) ── */}
       <header className="px-5 pt-14 pb-3 sticky top-0 bg-[#faf9f7] z-10">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-stone-900">어느멋진날카페AN</h1>
-          <div className="flex items-center gap-3">
-            {!loading && (
-              <span className="text-stone-400 text-sm">
-                {isFiltered ? `${filtered.length}개 결과` : `총 ${recipes.length}개`}
+          {selectionMode ? (
+            <>
+              <button
+                onClick={exitSelection}
+                className="text-stone-500 font-medium text-[15px]"
+              >
+                취소
+              </button>
+              <span className="font-bold text-stone-900 text-[15px]">
+                {selectedIds.size > 0 ? `${selectedIds.size}개 선택` : '항목 선택'}
               </span>
-            )}
-            <button
-              onClick={() => onNavigate('settings')}
-              className="text-stone-400 text-xl leading-none p-1"
-              aria-label="설정"
-            >
-              ⚙︎
-            </button>
-          </div>
+              <button
+                onClick={selectAll}
+                className="text-amber-800 font-medium text-[15px]"
+              >
+                전체선택
+              </button>
+            </>
+          ) : (
+            <>
+              <h1 className="text-2xl font-bold text-stone-900">어느멋진날카페AN</h1>
+              <div className="flex items-center gap-3">
+                {!loading && (
+                  <span className="text-stone-400 text-sm">
+                    {isFiltered ? `${filtered.length}개 결과` : `총 ${recipes.length}개`}
+                  </span>
+                )}
+                {!loading && recipes.length > 0 && (
+                  <button
+                    onClick={() => setSelectionMode(true)}
+                    className="text-stone-400 text-sm font-medium p-1"
+                  >
+                    선택
+                  </button>
+                )}
+                <button
+                  onClick={() => onNavigate('settings')}
+                  className="text-stone-400 text-xl leading-none p-1"
+                  aria-label="설정"
+                >
+                  ⚙︎
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* 검색창 */}
@@ -166,6 +219,9 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, onN
             recipes={[...favorites, ...rest]}
             onNavigate={onNavigate}
             onToggleFavorite={toggleFavorite}
+            selectionMode={selectionMode}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelect}
           />
         ) : (
           /* 기본 섹션 레이아웃 */
@@ -177,6 +233,9 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, onN
                   recipes={favorites}
                   onNavigate={onNavigate}
                   onToggleFavorite={toggleFavorite}
+                  selectionMode={selectionMode}
+                  selectedIds={selectedIds}
+                  onToggleSelect={toggleSelect}
                 />
               </section>
             )}
@@ -187,6 +246,9 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, onN
                   recipes={rest}
                   onNavigate={onNavigate}
                   onToggleFavorite={toggleFavorite}
+                  selectionMode={selectionMode}
+                  selectedIds={selectedIds}
+                  onToggleSelect={toggleSelect}
                 />
               </section>
             )}
@@ -195,28 +257,87 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, onN
       </main>
 
       {/* FAB */}
-      <button
-        onClick={() => onNavigate('form', null)}
-        className="fixed bottom-8 right-5 w-14 h-14 bg-amber-800 text-white rounded-full text-3xl shadow-xl flex items-center justify-center active:scale-95 transition-transform"
-        aria-label="레시피 추가"
-      >
-        +
-      </button>
+      {!selectionMode && (
+        <button
+          onClick={() => onNavigate('form', null)}
+          className="fixed bottom-8 right-5 w-14 h-14 bg-amber-800 text-white rounded-full text-3xl shadow-xl flex items-center justify-center active:scale-95 transition-transform"
+          aria-label="레시피 추가"
+        >
+          +
+        </button>
+      )}
+
+      {/* 선택 모드 하단 삭제 바 */}
+      {selectionMode && (
+        <div
+          className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-100 px-5 pt-4 shadow-lg"
+          style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}
+        >
+          <button
+            onClick={() => selectedIds.size > 0 && setShowDeleteConfirm(true)}
+            disabled={selectedIds.size === 0}
+            className="w-full py-3.5 bg-red-500 text-white rounded-2xl font-bold text-[15px] disabled:opacity-30 active:scale-[0.98] transition-all"
+          >
+            {selectedIds.size > 0 ? `${selectedIds.size}개 삭제` : '항목을 선택하세요'}
+          </button>
+        </div>
+      )}
+
+      {/* 삭제 확인 바텀시트 */}
+      {showDeleteConfirm && (
+        <div
+          className="fixed inset-0 bg-black/40 z-50 flex items-end"
+          onClick={() => !deleting && setShowDeleteConfirm(false)}
+        >
+          <div
+            className="w-full bg-white rounded-t-3xl px-6 pt-6"
+            style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 bg-stone-200 rounded-full mx-auto mb-4" />
+            <p className="text-center font-bold text-stone-900 text-lg mb-2">레시피 삭제</p>
+            <p className="text-center text-sm text-stone-500 mb-6">
+              선택한 <span className="font-semibold text-red-500">{selectedIds.size}개</span>의 레시피를 삭제합니다.<br />
+              이 작업은 되돌릴 수 없습니다.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                className="flex-1 py-3.5 bg-stone-100 text-stone-700 rounded-xl font-semibold disabled:opacity-40"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                disabled={deleting}
+                className="flex-1 py-3.5 bg-red-500 text-white rounded-xl font-semibold disabled:opacity-50"
+              >
+                {deleting ? '삭제 중...' : '삭제'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 /* ── 서브 컴포넌트 ── */
 
-function CardList({ recipes, onNavigate, onToggleFavorite }) {
+function CardList({ recipes, onNavigate, onToggleFavorite, selectionMode, selectedIds, onToggleSelect }) {
   return (
     <div className="space-y-3">
       {recipes.map((r) => (
         <RecipeCard
           key={r.id}
           recipe={r}
-          onPress={() => onNavigate('detail', r.id)}
+          onPress={() =>
+            selectionMode ? onToggleSelect(r.id) : onNavigate('detail', r.id)
+          }
           onToggleFavorite={() => onToggleFavorite(r.id, r.isFavorite)}
+          selectionMode={selectionMode}
+          selected={selectedIds?.has(r.id) ?? false}
         />
       ))}
     </div>
