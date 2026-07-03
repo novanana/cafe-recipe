@@ -41,7 +41,7 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, onN
       {/* ── 헤더 (sticky) ── */}
       <header className="px-5 pt-14 pb-3 sticky top-0 bg-[#faf9f7] z-10">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-stone-900">어느멋진날카페</h1>
+          <h1 className="text-2xl font-bold text-stone-900">어느멋진날카페AN</h1>
           <div className="flex items-center gap-3">
             {!loading && (
               <span className="text-stone-400 text-sm">
