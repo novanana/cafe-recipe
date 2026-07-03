@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { db } from '../db'
+import { deduplicateRecipes } from '../utils/dedup'
 
 /**
  * 레시피 CRUD 훅
@@ -30,7 +31,7 @@ export function useRecipes() {
   }, [])
 
   useEffect(() => {
-    fetchAll()
+    deduplicateRecipes().then(() => fetchAll())
   }, [fetchAll])
 
   /** 단일 레시피 조회 (상세 화면용) */

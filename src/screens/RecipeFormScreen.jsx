@@ -74,6 +74,16 @@ export default function RecipeFormScreen({
       setNameError('음료명을 입력해주세요')
       return
     }
+    const duplicate = recipes.find(
+      (r) =>
+        r.name.trim().toLowerCase() === form.name.trim().toLowerCase() &&
+        r.temperature === form.temperature &&
+        r.id !== recipeId,
+    )
+    if (duplicate) {
+      setNameError(`같은 이름·온도의 레시피가 이미 있습니다`)
+      return
+    }
     setSaving(true)
     const data = {
       ...form,
