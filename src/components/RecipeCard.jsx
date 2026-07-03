@@ -13,6 +13,7 @@ export default function RecipeCard({
   onToggleFavorite,
   selectionMode = false,
   selected = false,
+  dragHandleProps = {},
 }) {
   const { name, category, temperature, isFavorite, photos } = recipe
 
@@ -62,7 +63,7 @@ export default function RecipeCard({
         </div>
 
         {!selectionMode && (
-          <div className="flex justify-end">
+          <div className="flex items-center justify-end gap-3">
             <button
               className={`text-xl leading-none transition-colors ${
                 isFavorite ? 'text-amber-400' : 'text-stone-200'
@@ -71,6 +72,14 @@ export default function RecipeCard({
             >
               ★
             </button>
+            {/* 드래그 핸들 */}
+            <span
+              {...dragHandleProps}
+              onClick={(e) => e.stopPropagation()}
+              className="text-stone-300 text-lg leading-none cursor-grab active:cursor-grabbing select-none touch-none px-1"
+            >
+              ⠿
+            </span>
           </div>
         )}
       </div>

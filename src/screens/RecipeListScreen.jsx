@@ -1,5 +1,14 @@
 import { useState, useMemo } from 'react'
 import RecipeCard from '../components/RecipeCard'
+import {
+  DndContext, PointerSensor, TouchSensor,
+  useSensor, useSensors, closestCenter,
+} from '@dnd-kit/core'
+import {
+  SortableContext, useSortable,
+  verticalListSortingStrategy, arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 const CATEGORY_ORDER = ['커피', '라떼스페셜', '음료', '티', '프라페', '스무디', '요거트', '에이드', '디저트']
 
@@ -9,7 +18,7 @@ const TEMP_ORDER = [
   { value: 'blended', label: '블렌디드' },
 ]
 
-export default function RecipeListScreen({ recipes, loading, toggleFavorite, bulkDelete, onNavigate, initialFilter, onFilterChange }) {
+export default function RecipeListScreen({ recipes, loading, toggleFavorite, bulkDelete, reorderRecipes, onNavigate, initialFilter, onFilterChange }) {
   const [filter, setFilter] = useState({
     query:     initialFilter?.query     ?? '',
     activeTab: initialFilter?.activeTab ?? 'all',
@@ -33,6 +42,20 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, bul
   const [deleting, setDeleting]   = useState(false)
 
   const exitSelection = () => { setSelectionMode(false); setSelectedIds(new Set()) }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+    useSensor(TouchSensor,   { activationConstraint: { delay: 250, tolerance: 5 } }),
+  )
+
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return
+    const oldIndex = filtered.findIndex((r) => r.id === active.id)
+    const newIndex = filtered.findIndex((r) => r.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+    const newOrder = arrayMove(filtered, oldIndex, newIndex)
+    reorderRecipes(newOrder.map((r) => r.id), filtered)
+  }
 
   const toggleSelect = (id) =>
     setSelectedIds((prev) => {
@@ -221,53 +244,55 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, bul
 
       {/* ── 본문 ── */}
       <main className="px-4">
-        {loading ? (
-          <CenteredMsg>불러오는 중...</CenteredMsg>
-        ) : recipes.length === 0 ? (
-          <EmptyAll />
-        ) : filtered.length === 0 ? (
-          <EmptySearch query={query} tab={activeTab} onReset={() => updateFilter({ query: '', activeTab: 'all', activeTemp: 'all' })} />
-        ) : isFiltered ? (
-          /* 검색/필터 결과 → 즐겨찾기 먼저, 단순 플랫 리스트 */
-          <CardList
-            recipes={[...favorites, ...rest]}
-            onNavigate={onNavigate}
-            onToggleFavorite={toggleFavorite}
-            selectionMode={selectionMode}
-            selectedIds={selectedIds}
-            onToggleSelect={toggleSelect}
-          />
-        ) : (
-          /* 기본 섹션 레이아웃 */
-          <>
-            {favorites.length > 0 && (
-              <section className="mb-5">
-                <SectionLabel>즐겨찾기</SectionLabel>
-                <CardList
-                  recipes={favorites}
-                  onNavigate={onNavigate}
-                  onToggleFavorite={toggleFavorite}
-                  selectionMode={selectionMode}
-                  selectedIds={selectedIds}
-                  onToggleSelect={toggleSelect}
-                />
-              </section>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={filtered.map((r) => r.id)} strategy={verticalListSortingStrategy}>
+            {loading ? (
+              <CenteredMsg>불러오는 중...</CenteredMsg>
+            ) : recipes.length === 0 ? (
+              <EmptyAll />
+            ) : filtered.length === 0 ? (
+              <EmptySearch query={query} tab={activeTab} onReset={() => updateFilter({ query: '', activeTab: 'all', activeTemp: 'all' })} />
+            ) : isFiltered ? (
+              <CardList
+                recipes={[...favorites, ...rest]}
+                onNavigate={onNavigate}
+                onToggleFavorite={toggleFavorite}
+                selectionMode={selectionMode}
+                selectedIds={selectedIds}
+                onToggleSelect={toggleSelect}
+              />
+            ) : (
+              <>
+                {favorites.length > 0 && (
+                  <section className="mb-5">
+                    <SectionLabel>즐겨찾기</SectionLabel>
+                    <CardList
+                      recipes={favorites}
+                      onNavigate={onNavigate}
+                      onToggleFavorite={toggleFavorite}
+                      selectionMode={selectionMode}
+                      selectedIds={selectedIds}
+                      onToggleSelect={toggleSelect}
+                    />
+                  </section>
+                )}
+                {rest.length > 0 && (
+                  <section>
+                    {favorites.length > 0 && <SectionLabel>전체</SectionLabel>}
+                    <CardList
+                      recipes={rest}
+                      onNavigate={onNavigate}
+                      onToggleFavorite={toggleFavorite}
+                      selectionMode={selectionMode}
+                      selectedIds={selectedIds}
+                      onToggleSelect={toggleSelect}
+                    />
+                  </section>
+                )}
+              </>
             )}
-            {rest.length > 0 && (
-              <section>
-                {favorites.length > 0 && <SectionLabel>전체</SectionLabel>}
-                <CardList
-                  recipes={rest}
-                  onNavigate={onNavigate}
-                  onToggleFavorite={toggleFavorite}
-                  selectionMode={selectionMode}
-                  selectedIds={selectedIds}
-                  onToggleSelect={toggleSelect}
-                />
-              </section>
-            )}
-          </>
-        )}
+          </SortableContext>
+        </DndContext>
       </main>
 
       {/* FAB */}
@@ -343,17 +368,41 @@ function CardList({ recipes, onNavigate, onToggleFavorite, selectionMode, select
   return (
     <div className="space-y-3">
       {recipes.map((r) => (
-        <RecipeCard
+        <SortableCard
           key={r.id}
           recipe={r}
-          onPress={() =>
-            selectionMode ? onToggleSelect(r.id) : onNavigate('detail', r.id)
-          }
+          onPress={() => selectionMode ? onToggleSelect(r.id) : onNavigate('detail', r.id)}
           onToggleFavorite={() => onToggleFavorite(r.id, r.isFavorite)}
           selectionMode={selectionMode}
           selected={selectedIds?.has(r.id) ?? false}
         />
       ))}
+    </div>
+  )
+}
+
+function SortableCard({ recipe, onPress, onToggleFavorite, selectionMode, selected }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: recipe.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : 'auto',
+    position: 'relative',
+  }
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <RecipeCard
+        recipe={recipe}
+        onPress={onPress}
+        onToggleFavorite={onToggleFavorite}
+        selectionMode={selectionMode}
+        selected={selected}
+        dragHandleProps={{ ...attributes, ...listeners }}
+      />
     </div>
   )
 }

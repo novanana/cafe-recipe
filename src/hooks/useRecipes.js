@@ -25,7 +25,7 @@ export function useRecipes() {
   const [loading, setLoading] = useState(true)
 
   const fetchAll = useCallback(async () => {
-    const rows = await db.recipes.orderBy('id').toArray()
+    const rows = await db.recipes.orderBy('sortOrder').toArray()
     setRecipes(rows)
     setLoading(false)
   }, [])
@@ -40,6 +40,7 @@ export function useRecipes() {
   /** 레시피 추가 → 새 id 반환 */
   const addRecipe = useCallback(async (data) => {
     const now = new Date()
+    const maxOrder = await db.recipes.orderBy('sortOrder').last().then((r) => r?.sortOrder ?? 0)
     const id = await db.recipes.add({
       name: '',
       category: '기타',
@@ -52,6 +53,7 @@ export function useRecipes() {
       ...data,
       createdAt: now,
       updatedAt: now,
+      sortOrder: maxOrder + 1,
     })
     await fetchAll()
     return id
@@ -81,6 +83,19 @@ export function useRecipes() {
     await fetchAll()
   }, [fetchAll])
 
+  /** 필터된 목록 내 순서 변경: filteredItems의 sortOrder를 newIds 순서로 재배분 */
+  const reorderRecipes = useCallback(async (newIds, filteredItems) => {
+    const sortedOrders = filteredItems
+      .map((r) => r.sortOrder)
+      .sort((a, b) => a - b)
+    await db.transaction('rw', db.recipes, async () => {
+      await Promise.all(
+        newIds.map((id, i) => db.recipes.update(id, { sortOrder: sortedOrders[i] }))
+      )
+    })
+    await fetchAll()
+  }, [fetchAll])
+
   return {
     recipes,
     loading,
@@ -90,6 +105,7 @@ export function useRecipes() {
     deleteRecipe,
     toggleFavorite,
     bulkDelete,
+    reorderRecipes,
     refetch: fetchAll,
   }
 }
