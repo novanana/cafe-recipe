@@ -74,13 +74,12 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, bul
     exitSelection()
   }
 
-  /* ── 탭 목록 (실제 레시피에 있는 카테고리만 표시) ── */
+  /* ── 탭 목록 (실제 레시피에 있는 카테고리만 표시, 전체 없음) ── */
   const tabs = useMemo(() => {
     const hasFav = recipes.some((r) => r.isFavorite)
     const usedCats = new Set(recipes.map((r) => r.category))
     const cats = CATEGORY_ORDER.filter((c) => usedCats.has(c))
     return [
-      { id: 'all',       label: '전체' },
       ...(hasFav ? [{ id: 'favorites', label: '★ 즐겨찾기' }] : []),
       ...cats.map((c) => ({ id: c, label: c })),
     ]
@@ -186,8 +185,8 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, bul
           )}
         </div>
 
-        {/* 카테고리 탭 */}
-        {!loading && tabs.length > 1 && (
+        {/* 카테고리 탭 — 다시 누르면 해제 */}
+        {!loading && tabs.length > 0 && (
           <div
             className="flex gap-2 mt-3 overflow-x-auto pb-1"
             style={{ scrollbarWidth: 'none' }}
@@ -195,7 +194,10 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, bul
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => { setTab(tab.id); setTemp('all') }}
+                onClick={() => {
+                  if (activeTab === tab.id) { setTab('all'); setTemp('all') }
+                  else { setTab(tab.id); setTemp('all') }
+                }}
                 className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'bg-amber-800 text-white'
@@ -208,23 +210,13 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, bul
           </div>
         )}
 
-        {/* 온도 필터 */}
+        {/* 온도 필터 — 전체 없음, 다시 누르면 해제 */}
         {!loading && tempChips.length > 1 && (
           <div className="flex gap-2 mt-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-            <button
-              onClick={() => setTemp('all')}
-              className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                activeTemp === 'all'
-                  ? 'bg-stone-700 text-white border-stone-700'
-                  : 'bg-white text-stone-400 border-stone-200'
-              }`}
-            >
-              전체
-            </button>
             {tempChips.map((t) => (
               <button
                 key={t.value}
-                onClick={() => setTemp(t.value)}
+                onClick={() => setTemp(activeTemp === t.value ? 'all' : t.value)}
                 className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                   activeTemp === t.value
                     ? t.value === 'hot'
