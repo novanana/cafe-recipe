@@ -210,8 +210,8 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, bul
           </div>
         )}
 
-        {/* 온도 필터 — 전체 없음, 다시 누르면 해제 */}
-        {!loading && tempChips.length > 1 && (
+        {/* 온도 필터 — 전체 없음, 다시 누르면 해제, 디저트 제외 */}
+        {!loading && tempChips.length > 1 && activeTab !== '디저트' && (
           <div className="flex gap-2 mt-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
             {tempChips.map((t) => (
               <button

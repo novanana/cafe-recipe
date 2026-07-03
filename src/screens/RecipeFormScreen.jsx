@@ -200,24 +200,26 @@ export default function RecipeFormScreen({
           </div>
         </Field>
 
-        {/* ── 온도 ── */}
-        <Field label="온도">
-          <div className="flex gap-2">
-            {TEMPERATURES.map((t) => (
-              <button
-                key={t.value}
-                onClick={() => set('temperature', t.value)}
-                className={`flex-1 py-3 rounded-2xl text-sm font-semibold border transition-colors ${
-                  form.temperature === t.value
-                    ? t.active
-                    : 'bg-white text-stone-400 border-stone-200'
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </Field>
+        {/* ── 온도 (디저트 제외) ── */}
+        {form.category !== '디저트' && (
+          <Field label="온도">
+            <div className="flex gap-2">
+              {TEMPERATURES.map((t) => (
+                <button
+                  key={t.value}
+                  onClick={() => set('temperature', t.value)}
+                  className={`flex-1 py-3 rounded-2xl text-sm font-semibold border transition-colors ${
+                    form.temperature === t.value
+                      ? t.active
+                      : 'bg-white text-stone-400 border-stone-200'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </Field>
+        )}
 
         {/* ── 재료 ── */}
         <Field label="재료">
