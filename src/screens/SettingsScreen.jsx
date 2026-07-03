@@ -19,10 +19,18 @@ export default function SettingsScreen({ recipes, refetch, onNavigate }) {
     setSeeding(true)
     try {
       const items = getSeedRecipes()
-      await db.recipes.bulkAdd(items)
+      const existing = await db.recipes.toArray()
+      const existingKeys = new Set(existing.map((r) => `${r.name}__${r.temperature}`))
+      const toAdd = items.filter((r) => !existingKeys.has(`${r.name}__${r.temperature}`))
+      if (toAdd.length > 0) await db.recipes.bulkAdd(toAdd)
       await refetch()
       setShowSeedConfirm(false)
-      showToast('success', `기본 메뉴 ${items.length}개를 추가했습니다`)
+      showToast(
+        'success',
+        toAdd.length > 0
+          ? `기본 메뉴 ${toAdd.length}개를 추가했습니다`
+          : '이미 모든 메뉴가 추가되어 있습니다',
+      )
     } catch {
       showToast('error', '메뉴 추가에 실패했습니다')
     } finally {
