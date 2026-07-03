@@ -91,9 +91,11 @@ export default function RecipeDetailScreen({
             <span className="text-sm bg-stone-100 text-stone-600 px-3 py-1 rounded-full">
               {category}
             </span>
-            <span className={`text-sm px-3 py-1 rounded-full font-medium ${TEMP_CLASS[temperature]}`}>
-              {TEMP_LABEL[temperature]}
-            </span>
+            {temperature && TEMP_LABEL[temperature] && (
+              <span className={`text-sm px-3 py-1 rounded-full font-medium ${TEMP_CLASS[temperature]}`}>
+                {TEMP_LABEL[temperature]}
+              </span>
+            )}
           </div>
         </div>
 

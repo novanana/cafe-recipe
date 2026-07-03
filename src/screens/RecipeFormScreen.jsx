@@ -89,6 +89,7 @@ export default function RecipeFormScreen({
       ...form,
       name:        form.name.trim(),
       ingredients: form.ingredients.filter((i) => i.name.trim()),
+      temperature: form.category === '디저트' ? null : form.temperature,
     }
     if (isEdit) {
       await updateRecipe(recipeId, data)

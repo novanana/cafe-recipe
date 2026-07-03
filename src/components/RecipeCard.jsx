@@ -55,10 +55,14 @@ export default function RecipeCard({
           <p className="font-semibold text-stone-900 text-[15px] leading-snug truncate">{name}</p>
           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
             <span className="text-xs text-stone-400">{category}</span>
-            <span className="text-stone-200 text-xs">·</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${TEMP_CLASS[temperature]}`}>
-              {TEMP_LABEL[temperature]}
-            </span>
+            {temperature && TEMP_LABEL[temperature] && (
+              <>
+                <span className="text-stone-200 text-xs">·</span>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${TEMP_CLASS[temperature]}`}>
+                  {TEMP_LABEL[temperature]}
+                </span>
+              </>
+            )}
           </div>
         </div>
 

@@ -6,6 +6,14 @@ const score = (r) =>
   (r.memo?.length ?? 0) +
   (r.photos?.length ?? 0) * 5
 
+/** 디저트 카테고리 온도 값 제거 */
+export async function migrateDessertTemperature() {
+  const targets = await db.recipes.where('category').equals('디저트').toArray()
+  const toFix = targets.filter((r) => r.temperature != null && r.temperature !== '')
+  if (toFix.length === 0) return
+  await Promise.all(toFix.map((r) => db.recipes.update(r.id, { temperature: null })))
+}
+
 /** 스무디 카테고리 중 요거트 항목을 요거트 카테고리로 이동 */
 export async function migrateYogurtCategory() {
   const targets = await db.recipes
