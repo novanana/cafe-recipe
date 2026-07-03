@@ -27,9 +27,10 @@ export default function RecipeFormScreen({
     : null
 
   const [form, setForm] = useState({
-    name:        isCopy ? (existing?.name ?? '') : (existing?.name ?? ''),
+    name:        existing?.name        ?? '',
     category:    existing?.category    ?? '커피',
     temperature: existing?.temperature ?? 'iced',
+    price:       existing?.price       ?? null,
     photos:      existing?.photos      ?? [],
     ingredients: existing?.ingredients?.length > 0
       ? existing.ingredients
@@ -169,7 +170,7 @@ export default function RecipeFormScreen({
           />
         </Field>
 
-        {/* ── 음료명 ── */}
+        {/* ── 음료명 + 가격 ── */}
         <Field label="음료명 *" error={nameError}>
           <input
             value={form.name}
@@ -177,6 +178,25 @@ export default function RecipeFormScreen({
             placeholder="예: 카라멜 마끼아또"
             className="w-full bg-white border border-stone-200 rounded-2xl px-4 py-3 text-stone-900 placeholder-stone-300 text-[15px] outline-none focus:border-amber-400 transition-colors"
           />
+        </Field>
+
+        {/* ── 가격 ── */}
+        <Field label="가격">
+          <div className="relative">
+            <input
+              type="number"
+              inputMode="numeric"
+              value={form.price ?? ''}
+              onChange={(e) =>
+                set('price', e.target.value !== '' ? Number(e.target.value) : null)
+              }
+              placeholder="예: 4500"
+              className="w-full bg-white border border-stone-200 rounded-2xl px-4 py-3 pr-10 text-stone-900 placeholder-stone-300 text-[15px] outline-none focus:border-amber-400 transition-colors"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 text-sm pointer-events-none">
+              원
+            </span>
+          </div>
         </Field>
 
         {/* ── 카테고리 ── */}

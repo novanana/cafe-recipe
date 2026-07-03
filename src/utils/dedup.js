@@ -1,10 +1,26 @@
 import { db } from '../db'
+import { getSeedPriceMap } from '../data/seedRecipes'
 
 const score = (r) =>
   (r.ingredients?.length ?? 0) * 10 +
   (r.steps?.length ?? 0) +
   (r.memo?.length ?? 0) +
   (r.photos?.length ?? 0) * 5
+
+/** 시드 데이터 기반 가격 자동 설정 (가격 없는 항목만) */
+export async function migratePrices() {
+  const priceMap = getSeedPriceMap()
+  const all = await db.recipes.toArray()
+  const toUpdate = all.filter(
+    (r) => r.price == null && priceMap.has(`${r.name}__${String(r.temperature)}`)
+  )
+  if (toUpdate.length === 0) return
+  await Promise.all(
+    toUpdate.map((r) =>
+      db.recipes.update(r.id, { price: priceMap.get(`${r.name}__${String(r.temperature)}`) })
+    )
+  )
+}
 
 /** 디저트 카테고리 온도 값 제거 */
 export async function migrateDessertTemperature() {

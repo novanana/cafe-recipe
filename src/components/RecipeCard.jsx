@@ -15,7 +15,7 @@ export default function RecipeCard({
   selected = false,
   dragHandleProps = {},
 }) {
-  const { name, category, temperature, isFavorite, photos } = recipe
+  const { name, category, temperature, isFavorite, photos, price } = recipe
 
   return (
     <div
@@ -52,7 +52,14 @@ export default function RecipeCard({
 
       <div className="flex-1 px-4 py-3 flex flex-col justify-between min-w-0">
         <div>
-          <p className="font-semibold text-stone-900 text-[15px] leading-snug truncate">{name}</p>
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="font-semibold text-stone-900 text-[15px] leading-snug truncate">{name}</p>
+            {price != null && (
+              <span className="text-sm font-bold text-amber-800 flex-shrink-0">
+                {price.toLocaleString()}원
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
             <span className="text-xs text-stone-400">{category}</span>
             {temperature && TEMP_LABEL[temperature] && (

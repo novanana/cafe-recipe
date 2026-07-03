@@ -28,7 +28,7 @@ export default function RecipeDetailScreen({
     )
   }
 
-  const { name, category, temperature, isFavorite, photos, ingredients, steps, memo } = recipe
+  const { name, category, temperature, isFavorite, photos, ingredients, steps, memo, price } = recipe
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -87,13 +87,18 @@ export default function RecipeDetailScreen({
               ★
             </button>
           </div>
-          <div className="flex gap-2 mt-3">
+          <div className="flex items-center gap-2 mt-3">
             <span className="text-sm bg-stone-100 text-stone-600 px-3 py-1 rounded-full">
               {category}
             </span>
             {temperature && TEMP_LABEL[temperature] && (
               <span className={`text-sm px-3 py-1 rounded-full font-medium ${TEMP_CLASS[temperature]}`}>
                 {TEMP_LABEL[temperature]}
+              </span>
+            )}
+            {price != null && (
+              <span className="ml-auto text-lg font-bold text-amber-800">
+                {price.toLocaleString()}원
               </span>
             )}
           </div>
