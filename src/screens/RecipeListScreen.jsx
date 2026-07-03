@@ -3,9 +3,16 @@ import RecipeCard from '../components/RecipeCard'
 
 const CATEGORY_ORDER = ['커피', '라떼스페셜', '음료', '티', '프라페', '스무디', '에이드', '디저트']
 
+const TEMP_ORDER = [
+  { value: 'hot',     label: '핫' },
+  { value: 'iced',    label: '아이스' },
+  { value: 'blended', label: '블렌디드' },
+]
+
 export default function RecipeListScreen({ recipes, loading, toggleFavorite, onNavigate }) {
   const [query, setQuery]     = useState('')
   const [activeTab, setTab]   = useState('all')
+  const [activeTemp, setTemp] = useState('all')
 
   /* ── 탭 목록 (실제 레시피에 있는 카테고리만 표시) ── */
   const tabs = useMemo(() => {
@@ -19,19 +26,28 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, onN
     ]
   }, [recipes])
 
-  /* ── 탭 / 검색 필터 ── */
-  const filtered = useMemo(() => {
-    let result = recipes
-    if (activeTab === 'favorites')      result = result.filter((r) => r.isFavorite)
-    else if (activeTab !== 'all')       result = result.filter((r) => r.category === activeTab)
+  /* ── 카테고리/즐겨찾기 필터 후 온도 칩 목록 ── */
+  const catFiltered = useMemo(() => {
+    if (activeTab === 'favorites') return recipes.filter((r) => r.isFavorite)
+    if (activeTab !== 'all')      return recipes.filter((r) => r.category === activeTab)
+    return recipes
+  }, [recipes, activeTab])
 
+  const tempChips = useMemo(() => {
+    const usedTemps = new Set(catFiltered.map((r) => r.temperature))
+    return TEMP_ORDER.filter((t) => usedTemps.has(t.value))
+  }, [catFiltered])
+
+  /* ── 탭 / 온도 / 검색 필터 ── */
+  const filtered = useMemo(() => {
+    let result = catFiltered
+    if (activeTemp !== 'all') result = result.filter((r) => r.temperature === activeTemp)
     const q = query.trim().toLowerCase()
     if (q) result = result.filter((r) => r.name.toLowerCase().includes(q))
-
     return result
-  }, [recipes, activeTab, query])
+  }, [catFiltered, activeTemp, query])
 
-  const isFiltered   = activeTab !== 'all' || query.trim() !== ''
+  const isFiltered   = activeTab !== 'all' || activeTemp !== 'all' || query.trim() !== ''
   const favorites    = filtered.filter((r) => r.isFavorite)
   const rest         = filtered.filter((r) => !r.isFavorite)
 
@@ -89,7 +105,7 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, onN
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setTab(tab.id)}
+                onClick={() => { setTab(tab.id); setTemp('all') }}
                 className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'bg-amber-800 text-white'
@@ -97,6 +113,39 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, onN
                 }`}
               >
                 {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 온도 필터 */}
+        {!loading && tempChips.length > 1 && (
+          <div className="flex gap-2 mt-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+            <button
+              onClick={() => setTemp('all')}
+              className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                activeTemp === 'all'
+                  ? 'bg-stone-700 text-white border-stone-700'
+                  : 'bg-white text-stone-400 border-stone-200'
+              }`}
+            >
+              전체
+            </button>
+            {tempChips.map((t) => (
+              <button
+                key={t.value}
+                onClick={() => setTemp(t.value)}
+                className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                  activeTemp === t.value
+                    ? t.value === 'hot'
+                      ? 'bg-orange-100 text-orange-600 border-orange-300'
+                      : t.value === 'iced'
+                      ? 'bg-sky-100 text-sky-600 border-sky-300'
+                      : 'bg-emerald-100 text-emerald-600 border-emerald-300'
+                    : 'bg-white text-stone-400 border-stone-200'
+                }`}
+              >
+                {t.label}
               </button>
             ))}
           </div>
@@ -110,7 +159,7 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, onN
         ) : recipes.length === 0 ? (
           <EmptyAll />
         ) : filtered.length === 0 ? (
-          <EmptySearch query={query} tab={activeTab} onReset={() => { setQuery(''); setTab('all') }} />
+          <EmptySearch query={query} tab={activeTab} onReset={() => { setQuery(''); setTab('all'); setTemp('all') }} />
         ) : isFiltered ? (
           /* 검색/필터 결과 → 즐겨찾기 먼저, 단순 플랫 리스트 */
           <CardList
