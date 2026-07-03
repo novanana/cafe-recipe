@@ -1,14 +1,34 @@
 import { useState, useRef, useEffect } from 'react'
 import { exportData, parseBackupFile, importData } from '../utils/backupUtils'
+import { getSeedRecipes } from '../data/seedRecipes'
+import { db } from '../db'
 
 export default function SettingsScreen({ recipes, refetch, onNavigate }) {
-  const [exporting,   setExporting]   = useState(false)
-  const [preview,     setPreview]     = useState(null)  // { count, exportedAt, recipes }
-  const [importing,   setImporting]   = useState(false)
-  const [toast,       setToast]       = useState(null)  // { type, text }
+  const [exporting,       setExporting]       = useState(false)
+  const [preview,         setPreview]         = useState(null)
+  const [importing,       setImporting]       = useState(false)
+  const [showSeedConfirm, setShowSeedConfirm] = useState(false)
+  const [seeding,         setSeeding]         = useState(false)
+  const [toast,           setToast]           = useState(null)
   const fileRef = useRef(null)
 
   const showToast = (type, text) => setToast({ type, text })
+
+  /* ── 기본 메뉴 추가 ── */
+  const handleSeed = async () => {
+    setSeeding(true)
+    try {
+      const items = getSeedRecipes()
+      await db.recipes.bulkAdd(items)
+      await refetch()
+      setShowSeedConfirm(false)
+      showToast('success', `기본 메뉴 ${items.length}개를 추가했습니다`)
+    } catch {
+      showToast('error', '메뉴 추가에 실패했습니다')
+    } finally {
+      setSeeding(false)
+    }
+  }
 
   /* ── 내보내기 ── */
   const handleExport = async () => {
@@ -89,6 +109,21 @@ export default function SettingsScreen({ recipes, refetch, onNavigate }) {
           </div>
         </Section>
 
+        {/* ── 기본 메뉴 ── */}
+        <Section title="기본 메뉴">
+          <div className="bg-white rounded-2xl overflow-hidden">
+            <MenuButton
+              icon="📋"
+              label="어느멋진날카페AN 메뉴 불러오기"
+              desc={`전체 메뉴 ${getSeedRecipes().length}개를 이름으로 추가`}
+              onClick={() => setShowSeedConfirm(true)}
+            />
+          </div>
+          <p className="text-xs text-stone-400 mt-2 px-1 leading-relaxed">
+            재료·레시피는 직접 입력해야 합니다. 이미 추가된 경우 중복될 수 있습니다.
+          </p>
+        </Section>
+
         {/* ── 데이터 관리 ── */}
         <Section title="데이터 관리">
           <div className="bg-white rounded-2xl overflow-hidden divide-y divide-stone-50">
@@ -165,6 +200,46 @@ export default function SettingsScreen({ recipes, refetch, onNavigate }) {
                 className="flex-1 py-3.5 bg-amber-800 text-white rounded-xl font-semibold disabled:opacity-50"
               >
                 {importing ? '복원 중...' : '불러오기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 기본 메뉴 추가 확인 ── */}
+      {showSeedConfirm && (
+        <div
+          className="fixed inset-0 bg-black/40 z-50 flex items-end"
+          onClick={() => !seeding && setShowSeedConfirm(false)}
+        >
+          <div
+            className="w-full bg-white rounded-t-3xl p-6 pb-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 bg-stone-200 rounded-full mx-auto mb-5" />
+            <p className="text-center font-bold text-stone-900 text-lg mb-3">기본 메뉴 불러오기</p>
+            <div className="bg-stone-50 rounded-2xl px-4 py-3 mb-5 space-y-1.5">
+              <InfoRow label="추가될 메뉴 수" value={`${getSeedRecipes().length}개`} />
+              <InfoRow label="기존 데이터" value="유지됨" />
+            </div>
+            <p className="text-center text-sm text-stone-500 leading-relaxed mb-6">
+              어느멋진날카페AN의 전체 메뉴를 이름만 추가합니다.<br />
+              재료와 레시피는 직접 입력하세요.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowSeedConfirm(false)}
+                disabled={seeding}
+                className="flex-1 py-3.5 bg-stone-100 text-stone-700 rounded-xl font-semibold disabled:opacity-40"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleSeed}
+                disabled={seeding}
+                className="flex-1 py-3.5 bg-amber-800 text-white rounded-xl font-semibold disabled:opacity-50"
+              >
+                {seeding ? '추가 중...' : '추가하기'}
               </button>
             </div>
           </div>

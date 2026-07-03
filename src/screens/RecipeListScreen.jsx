@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import RecipeCard from '../components/RecipeCard'
 
-const CATEGORY_ORDER = ['에스프레소', '라떼', '프라푸치노', '스무디', '티', '에이드', '기타']
+const CATEGORY_ORDER = ['커피', '라떼스페셜', '음료', '티', '프라페', '스무디', '에이드', '디저트']
 
 export default function RecipeListScreen({ recipes, loading, toggleFavorite, onNavigate }) {
   const [query, setQuery]     = useState('')

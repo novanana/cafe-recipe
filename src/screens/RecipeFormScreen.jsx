@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { resizeImage } from '../utils/imageUtils'
 import RecipePhoto from '../components/RecipePhoto'
 
-const CATEGORIES = ['에스프레소', '라떼', '프라푸치노', '스무디', '티', '에이드', '기타']
+const CATEGORIES = ['커피', '라떼스페셜', '음료', '티', '프라페', '스무디', '에이드', '디저트']
 
 const TEMPERATURES = [
   { value: 'hot',      label: '핫',      active: 'bg-orange-100 text-orange-600 border-orange-300' },
@@ -22,7 +22,7 @@ export default function RecipeFormScreen({
 
   const [form, setForm] = useState({
     name:        existing?.name        ?? '',
-    category:    existing?.category    ?? '라떼',
+    category:    existing?.category    ?? '커피',
     temperature: existing?.temperature ?? 'iced',
     photos:      existing?.photos      ?? [],
     ingredients: existing?.ingredients?.length > 0
