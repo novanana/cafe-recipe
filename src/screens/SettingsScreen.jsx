@@ -217,7 +217,8 @@ export default function SettingsScreen({ recipes, refetch, onNavigate }) {
             <div className="w-10 h-1 bg-stone-200 rounded-full mx-auto mb-4" />
             <p className="text-center font-bold text-stone-900 text-lg mb-4">기본 메뉴 불러오기</p>
             <p className="text-center text-sm text-stone-500 leading-relaxed mb-4">
-              어느멋진날카페AN 전체 메뉴 <span className="font-semibold text-stone-700">94개</span>를
+              어느멋진날카페AN 전체 메뉴{' '}
+              <span className="font-semibold text-stone-700">{getSeedRecipes().length}개</span>를
               이름으로 추가합니다.<br />기존 데이터는 유지됩니다.
             </p>
             <div className="flex gap-3">
