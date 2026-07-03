@@ -48,6 +48,12 @@ export default function RecipeDetailScreen({
         </button>
         <div className="flex gap-4">
           <button
+            onClick={() => onNavigate('form', null, recipeId)}
+            className="text-stone-500 text-sm font-medium"
+          >
+            복사
+          </button>
+          <button
             onClick={() => onNavigate('form', recipeId)}
             className="text-stone-500 text-sm font-medium"
           >

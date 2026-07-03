@@ -15,13 +15,19 @@ export default function RecipeFormScreen({
   addRecipe,
   updateRecipe,
   recipeId,
+  copyFromId,
   onNavigate,
 }) {
   const isEdit = recipeId != null
-  const existing = isEdit ? recipes.find((r) => r.id === recipeId) : null
+  const isCopy = !isEdit && copyFromId != null
+  const existing = isEdit
+    ? recipes.find((r) => r.id === recipeId)
+    : isCopy
+    ? recipes.find((r) => r.id === copyFromId)
+    : null
 
   const [form, setForm] = useState({
-    name:        existing?.name        ?? '',
+    name:        isCopy ? (existing?.name ?? '') : (existing?.name ?? ''),
     category:    existing?.category    ?? '커피',
     temperature: existing?.temperature ?? 'iced',
     photos:      existing?.photos      ?? [],
@@ -83,8 +89,11 @@ export default function RecipeFormScreen({
     }
   }
 
-  const handleCancel = () =>
-    onNavigate(isEdit ? 'detail' : 'list', isEdit ? recipeId : null)
+  const handleCancel = () => {
+    if (isEdit) onNavigate('detail', recipeId)
+    else if (isCopy) onNavigate('detail', copyFromId)
+    else onNavigate('list')
+  }
 
   return (
     <div className="min-h-screen bg-[#faf9f7] pb-16">
@@ -97,7 +106,7 @@ export default function RecipeFormScreen({
           취소
         </button>
         <span className="font-bold text-stone-900 text-[15px]">
-          {isEdit ? '레시피 수정' : '레시피 추가'}
+          {isEdit ? '레시피 수정' : isCopy ? '레시피 복사' : '레시피 추가'}
         </span>
         <button
           onClick={handleSave}
