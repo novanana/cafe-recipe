@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { db } from '../db'
-import { deduplicateRecipes } from '../utils/dedup'
+import { deduplicateRecipes, migrateYogurtCategory } from '../utils/dedup'
 
 /**
  * 레시피 CRUD 훅
@@ -31,7 +31,7 @@ export function useRecipes() {
   }, [])
 
   useEffect(() => {
-    deduplicateRecipes().then(() => fetchAll())
+    migrateYogurtCategory().then(() => deduplicateRecipes()).then(() => fetchAll())
   }, [fetchAll])
 
   /** 단일 레시피 조회 (상세 화면용) */

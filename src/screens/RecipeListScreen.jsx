@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import RecipeCard from '../components/RecipeCard'
 
-const CATEGORY_ORDER = ['커피', '라떼스페셜', '음료', '티', '프라페', '스무디', '에이드', '디저트']
+const CATEGORY_ORDER = ['커피', '라떼스페셜', '음료', '티', '프라페', '스무디', '요거트', '에이드', '디저트']
 
 const TEMP_ORDER = [
   { value: 'hot',     label: '핫' },

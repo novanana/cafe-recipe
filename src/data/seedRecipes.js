@@ -81,20 +81,22 @@ export function getSeedRecipes() {
     make('민트초코프라페', '프라페', 'blended'),
     make('그린티프라페',   '프라페', 'blended'),
 
-    // ── 스무디 & 요거트 (blended) ────────────
-    make('딸기스무디',      '스무디', 'blended'),
-    make('망고스무디',      '스무디', 'blended'),
-    make('블루베리스무디',  '스무디', 'blended'),
-    make('유자스무디',      '스무디', 'blended'),
-    make('키위스무디',      '스무디', 'blended'),
-    make('아보카도바나나주스', '스무디', 'blended'),
-    make('플레인요거트',    '스무디', 'blended'),
-    make('딸기요거트',      '스무디', 'blended'),
-    make('망고요거트',      '스무디', 'blended'),
-    make('키위요거트',      '스무디', 'blended'),
-    make('블루베리요거트',  '스무디', 'blended'),
-    make('유자요거트',      '스무디', 'blended'),
-    make('베리베리요거트',  '스무디', 'blended'),
+    // ── 스무디 (blended) ─────────────────────
+    make('딸기스무디',        '스무디', 'blended'),
+    make('망고스무디',        '스무디', 'blended'),
+    make('블루베리스무디',    '스무디', 'blended'),
+    make('유자스무디',        '스무디', 'blended'),
+    make('키위스무디',        '스무디', 'blended'),
+    make('아보카도바나나주스','스무디', 'blended'),
+
+    // ── 요거트 (blended) ─────────────────────
+    make('플레인요거트',    '요거트', 'blended'),
+    make('딸기요거트',      '요거트', 'blended'),
+    make('망고요거트',      '요거트', 'blended'),
+    make('키위요거트',      '요거트', 'blended'),
+    make('블루베리요거트',  '요거트', 'blended'),
+    make('유자요거트',      '요거트', 'blended'),
+    make('베리베리요거트',  '요거트', 'blended'),
 
     // ── 에이드 & 아이스티 (iced) ─────────────
     make('레몬에이드',     '에이드', 'iced'),
