@@ -14,3 +14,8 @@ db.version(2).stores({
     all.map((r) => tx.table('recipes').update(r.id, { sortOrder: r.id }))
   )
 })
+
+db.version(3).stores({
+  recipes: '++id, name, category, temperature, isFavorite, createdAt, updatedAt, sortOrder',
+  notes: '++id, title, createdAt, updatedAt, sortOrder',
+})
