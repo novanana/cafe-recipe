@@ -22,7 +22,12 @@ export default function SettingsScreen({ recipes, refetch, onNavigate }) {
       const existing = await db.recipes.toArray()
       const existingKeys = new Set(existing.map((r) => `${r.name}__${r.temperature}`))
       const toAdd = items.filter((r) => !existingKeys.has(`${r.name}__${r.temperature}`))
-      if (toAdd.length > 0) await db.recipes.bulkAdd(toAdd)
+      if (toAdd.length > 0) {
+        const maxOrder = await db.recipes.orderBy('sortOrder').last().then((r) => r?.sortOrder ?? 0)
+        await db.recipes.bulkAdd(
+          toAdd.map((r, i) => ({ ...r, sortOrder: maxOrder + i + 1 }))
+        )
+      }
       await refetch()
       setShowSeedConfirm(false)
       showToast(
