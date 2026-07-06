@@ -154,7 +154,7 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, bul
                 <button
                   onClick={() => onNavigate('notes')}
                   className="text-stone-400 text-xl leading-none p-1"
-                  aria-label="매장 메모"
+                  aria-label="카페 관리"
                 >
                   🗒️
                 </button>

@@ -10,12 +10,9 @@ export default function NotesListScreen({ notes, loading, onNavigate }) {
           >
             ‹ 레시피
           </button>
-          <h1 className="text-xl font-bold text-stone-900">매장 메모</h1>
+          <h1 className="text-xl font-bold text-stone-900">카페 관리</h1>
           <span className="w-12" />
         </div>
-        <p className="text-stone-400 text-xs text-center mt-1">
-          포스기 사용법·재료 관리 등 인수인계 메모
-        </p>
       </header>
 
       {/* 본문 */}

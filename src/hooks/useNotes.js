@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { db } from '../db'
 
 /**
- * 매장 메모 CRUD 훅
+ * 카페 관리 메모 CRUD 훅
  *
  * notes shape:
  * {
