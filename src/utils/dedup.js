@@ -42,6 +42,18 @@ export async function migrateYogurtCategory() {
   )
 }
 
+/** 디저트 카테고리 중 생과일주스 항목을 생과일주스 카테고리로 이동 */
+export async function migrateFreshJuiceCategory() {
+  const targets = await db.recipes
+    .where('category').equals('디저트')
+    .filter((r) => r.name.includes('생과일주스'))
+    .toArray()
+  if (targets.length === 0) return
+  await Promise.all(
+    targets.map((r) => db.recipes.update(r.id, { category: '생과일주스', temperature: 'iced' }))
+  )
+}
+
 export async function deduplicateRecipes() {
   const all = await db.recipes.orderBy('id').toArray()
   const seen = new Map()

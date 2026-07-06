@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { db } from '../db'
-import { deduplicateRecipes, migrateYogurtCategory, migrateDessertTemperature, migratePrices } from '../utils/dedup'
+import { deduplicateRecipes, migrateYogurtCategory, migrateDessertTemperature, migratePrices, migrateFreshJuiceCategory } from '../utils/dedup'
 
 /**
  * 레시피 CRUD 훅
@@ -33,6 +33,7 @@ export function useRecipes() {
   useEffect(() => {
     migrateDessertTemperature()
       .then(() => migrateYogurtCategory())
+      .then(() => migrateFreshJuiceCategory())
       .then(() => migratePrices())
       .then(() => deduplicateRecipes())
       .then(() => fetchAll())
