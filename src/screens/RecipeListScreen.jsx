@@ -120,33 +120,38 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, bul
             <>
               <button
                 onClick={exitSelection}
-                className="text-stone-500 font-medium text-[15px]"
+                className="text-stone-500 font-medium text-[15px] whitespace-nowrap"
               >
                 취소
               </button>
-              <span className="font-bold text-stone-900 text-[15px]">
+              <span className="font-bold text-stone-900 text-[15px] whitespace-nowrap">
                 {selectedIds.size > 0 ? `${selectedIds.size}개 선택` : '항목 선택'}
               </span>
               <button
                 onClick={selectAll}
-                className="text-amber-800 font-medium text-[15px]"
+                className="text-amber-800 font-medium text-[15px] whitespace-nowrap"
               >
                 전체선택
               </button>
             </>
           ) : (
             <>
-              <h1 className="text-2xl font-bold text-stone-900">어느멋진날카페AN</h1>
-              <div className="flex items-center gap-3">
-                {!loading && (
-                  <span className="text-stone-400 text-sm">
-                    {isFiltered ? `${filtered.length}개 결과` : `총 ${recipes.length}개`}
+              <div className="flex items-center gap-2">
+                <span className="text-2xl leading-none">☕</span>
+                <h1 className="text-2xl font-bold text-stone-900 leading-tight">
+                  어느멋진날<br />카페AN
+                </h1>
+              </div>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                {!loading && isFiltered && (
+                  <span className="text-stone-400 text-sm whitespace-nowrap">
+                    {filtered.length}개 결과
                   </span>
                 )}
                 {!loading && recipes.length > 0 && (
                   <button
                     onClick={() => setSelectionMode(true)}
-                    className="text-stone-400 text-sm font-medium p-1"
+                    className="text-stone-400 text-sm font-medium p-1 whitespace-nowrap"
                   >
                     선택
                   </button>
