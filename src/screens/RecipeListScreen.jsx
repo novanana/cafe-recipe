@@ -138,8 +138,8 @@ export default function RecipeListScreen({ recipes, loading, toggleFavorite, bul
             <>
               <div className="flex items-center gap-2">
                 <span className="text-2xl leading-none">☕</span>
-                <h1 className="text-2xl font-bold text-stone-900 leading-tight">
-                  어느멋진날<br />카페AN
+                <h1 className="text-2xl font-bold text-stone-900 leading-tight whitespace-nowrap">
+                  어느멋진날 카페AN
                 </h1>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
